@@ -1,0 +1,54 @@
+name: CI-CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-test-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Setup Node
+      uses: actions/setup-node@v4
+      with:
+        node-version: 18
+
+    - name: Install Dependencies
+      run: npm install
+
+    - name: Lint Code
+      run: npm run lint
+
+    - name: Build Application
+      run: npm run build
+
+    - name: Run Tests
+      run: npm test
+
+    - name: Security Scan (npm audit)
+      run: npm audit --audit-level=high
+
+    - name: Setup SSH
+      uses: webfactory/ssh-agent@v0.8.0
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+    - name: Deploy to payslate-server
+      run: |
+        ssh -o StrictHostKeyChecking=no ubuntu@13.203.132.99 << 'EOF'
+          cd /home/ubuntu/payslate/payslate-website
+          echo "Pull latest code"
+          git pull origin main
+          echo "Install dependencies"
+          npm install
+          echo "Build application"
+          npm run build
+          echo "Restart frontend service"
+          pm2 restart payslate-website || pm2 start npm --name payslate-website -- start
+        EOF

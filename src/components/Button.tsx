@@ -8,10 +8,11 @@ type ButtonProps = {
   icon?: ReactNode;
   iconPosition?: "left" | "right";
   disabled?: boolean;
+  children ?: ReactNode;
 };
 
 const DEFAULT_BUTTON_CLASSES =
-  "rounded-full bg-primary px-5 py-2 text-sm font-medium text-white transition focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 cursor-pointer inline-flex items-center gap-2";
+  "rounded-full bg-primary px-6 py-3.5 text-sm font-medium text-white transition focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 cursor-pointer inline-flex items-center gap-2";
 
 export default function Button({
   label,
@@ -21,6 +22,7 @@ export default function Button({
   icon,
   iconPosition = "left",
   disabled = false,
+  children
 }: ButtonProps) {
   return (
     <button
@@ -32,6 +34,7 @@ export default function Button({
       {icon && iconPosition === "left" && icon}
       {label}
       {icon && iconPosition === "right" && icon}
+      {children}
     </button>
   );
 }

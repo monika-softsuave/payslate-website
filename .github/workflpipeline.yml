@@ -1,0 +1,43 @@
+name: Frontend CI-CD
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Build Next.js App
+        run: npm run build
+
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.8.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Copy Build to Server
+        run: |
+          scp -r .next package.json package-lock.json public ubuntu@13.203.132.99:/home/ubuntu/payslate/payslate-website
+
+      - name: Restart Frontend
+        run: |
+          ssh -o StrictHostKeyChecking=no ubuntu@13.203.132.99 << 'EOF'
+            cd /home/ubuntu/payslate/payslate-website
+            npm install --production
+            pm2 restart payslate-website
+          EOF

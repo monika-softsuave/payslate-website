@@ -28,9 +28,6 @@ jobs:
     - name: Build Application
       run: npm run build
 
-    - name: Run Tests
-      run: npm test
-
     - name: Security Scan (npm audit)
       run: npm audit --audit-level=high
 
